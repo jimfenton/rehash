@@ -22,19 +22,19 @@ Note that an attacker that is able to observe traffic between the verifier and t
 
 Rehash accepts an HTTP POST request on TCP port 8888 containing a JSON encapsulated, base64 encoded hash value to be rehashed. The following is an example of a request payload:
 
-`{“hash”:”(base64 here)”}`
+`{"hash":"4i/qDyjZWTfwQvM4Lhcb9cBEGrALR6hX2ANuj4MAaUo="}`
 
 Rehash responds with a similarly encoded hashed value:
 
-`{“rehash”:”(base64 here)”}`
+`{"rehash":"Rk/Q5p20mWsQD0rpDZjfNtPbRlkWxCX0s8kgMHYcBFE="}`
 
 Storage of rehashed memorized secrets of course depends on the authentication system it is being used with. It is recommended that the rehashed secrets be tagged to indicate the use of rehash, so that rehash can be integrated into existing password databases. A typical representation (used by Django) appears as follows:
 
-** to be supplied **
+`pbkdf2_sha256$30000$PosCWw6yQTwU$4i/qDyjZWTfwQvM4Lhcb9cBEGrALR6hX2ANuj4MAaUo=`
 
-This might be replaced by:
+This might be replaced by something like:
 
-** to be supplied **
+`pbkdf2_sha256_rehash$30000$PosCWw6yQTwU$Rk/Q5p20mWsQD0rpDZjfNtPbRlkWxCX0s8kgMHYcBFE=`
 
 ## Future Work
 
