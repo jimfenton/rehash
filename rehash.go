@@ -29,7 +29,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"golang.org/x/crypto/pbkdf2"
 	"io/ioutil"
@@ -41,15 +40,9 @@ type hasher struct {
 	Key []byte
 }
 
-type hashMsg struct {
-	Hash64 string `json:"hash"` //in base64 format
-}
-
 func (ha hasher) ServeHTTP(
 	w http.ResponseWriter,
 	r *http.Request) {
-
-	var hm hashMsg
 
 	if r.Method != "POST" {
 		w.Header().Add("Allow", "POST")
@@ -57,20 +50,14 @@ func (ha hasher) ServeHTTP(
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	hm, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, "Read error: ", err)
 		return
 	}
-	err = json.Unmarshal(body, &hm)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintln(w, "Error decoding hash json:", err)
-		return
-	}
 
-	h, err := base64.StdEncoding.DecodeString(hm.Hash64)
+	h, err := base64.StdEncoding.DecodeString(string(hm))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, "Input hash base64 decode error", err)
@@ -79,7 +66,7 @@ func (ha hasher) ServeHTTP(
 
 	h = pbkdf2.Key(h, ha.Key, 1, 32, sha256.New)
 	h2 := base64.StdEncoding.EncodeToString(h)
-	fmt.Fprintf(w, "{\"rehash\": %q}\n", h2)
+	fmt.Fprintf(w, "%s\n",h2)
 
 }
 
