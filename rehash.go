@@ -66,23 +66,30 @@ func (ha hasher) ServeHTTP(
 
 	h = pbkdf2.Key(h, ha.Key, 1, 32, sha256.New)
 	h2 := base64.StdEncoding.EncodeToString(h)
-	fmt.Fprintf(w, "%s\n",h2)
+	fmt.Fprintf(w, "%s\n", h2)
 
 }
 
 func main() {
 	var hr hasher
+
+	/* As a proof-of-concept, rehash reads the private key from a file, /etc/rehash.key. The secrecy
+	   of this value is obviously critical to the security of rehash. In practice other facilities,
+	   such as key vaults, should be used to provide higher security. Since these mechanisms are often
+	   platform-dependent, the more simple-minded approach is used here.
+	*/
+
 	dat, err := ioutil.ReadFile("/etc/rehash.key")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-// Key is in hexadecimal, 64 hex characters
+	// Key is in hexadecimal, 64 hex characters
 
 	hr.Key, err = hex.DecodeString(string(dat)[0:64])
 	if err != nil {
 		log.Fatal(err)
-		}
+	}
 
 	log.Fatal(http.ListenAndServe(":8888", hr))
 }
